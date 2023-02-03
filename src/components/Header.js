@@ -4,7 +4,7 @@ import Images from "./Images";
 import { BsSearch, BsThreeDots } from "react-icons/bs";
 const Header = ({ show }) => {
   return (
-    <nav className="px-14">
+    <nav className="px-14 bg-white">
       <Flex className="justify-between items-center h-20">
         <div className="w-[100px] grid h-full items-center border-r border-solid border-[#F4F4F4]">
           <Images imgsrc="assets/logo.png" />

@@ -3,6 +3,9 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      container: {
+        maxWidth: "1360px",
+      },
       fontFamily: {
         nunito: ["Nunito", "sans-serif"],
       },

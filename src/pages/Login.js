@@ -23,6 +23,10 @@ const Login = () => {
         <button className=" sm:max-md:mb-5 max-sm:py-4 bg-primary text-white text-xl font-nunito font-semibold w-full py-5 rounded-full">
           Sign In
         </button>
+        <p className="text-center my-5">
+          Don't Have Account ?{" "}
+          <span className="text-primary font-bold font-nunito ">Sign Up</span>
+        </p>
       </div>
     </Flex>
   );

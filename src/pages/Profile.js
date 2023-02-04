@@ -4,13 +4,14 @@ import Expredu from "../components/Expredu";
 import Flex from "../components/Flex";
 import Header from "../components/Header";
 import Images from "../components/Images";
+import Users from "../components/Users";
 const Profile = () => {
   return (
     <div className="bg-[#F7F9FB]">
       <Header show={true} />
       <div className="container mx-auto mt-16 ">
         <Flex className="gap-x-10">
-          <div className="w-3/4 ">
+          <div className="w-3/5 ">
             {/* Proflie info */}
             <div className="bg-white">
               <Images imgsrc="assets/cover2.png" className={`w-full`} />
@@ -197,8 +198,36 @@ const Profile = () => {
             </div>
             {/*End Education */}
           </div>
-          <div className="w-1/4 ">
-            <div>fru</div>
+          <div className="w-2/5 ">
+            <div className="p-9 pb-3 bg-white rounded-lg ">
+              <h2 className="font-bold font-nunito text-xl text-[#181818] mb-5 border-b border-solid border-slate-300 pb-3">
+                All users
+              </h2>
+              <Users
+                img="assets/profile.png"
+                userName="Darlene Black "
+                userBio="HR-manager, 10 000 connec..."
+                addFriend="Add Friend"
+              />
+              <Users
+                img="assets/profile.png"
+                userName="Darlene Black "
+                userBio="HR-manager, 10 000 connec..."
+                addFriend="Add Friend"
+              />
+              <Users
+                img="assets/profile.png"
+                userName="Darlene Black "
+                userBio="HR-manager, 10 000 connec..."
+                addFriend="Add Friend"
+              />
+              <Users
+                img="assets/profile.png"
+                userName="Darlene Black "
+                userBio="HR-manager, 10 000 connec..."
+                addFriend="Add Friend"
+              />
+            </div>
           </div>
         </Flex>
       </div>

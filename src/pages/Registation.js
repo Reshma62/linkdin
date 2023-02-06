@@ -10,10 +10,11 @@ import {
   getAuth,
   createUserWithEmailAndPassword,
   sendEmailVerification,
+  updateProfile,
 } from "firebase/auth";
 const Registation = () => {
   const auth = getAuth();
-  let navigate= useNavigate()
+  let navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [text, setText] = useState("");
   const [email, setEmail] = useState("");
@@ -79,19 +80,32 @@ const Registation = () => {
       setLoading(true);
       createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
-          // Signed in
-          const user = userCredential.user;
-          toast.success("Registation is successful Please check your mail for veryfication");
-          setLoading( false );
-          sendEmailVerification(auth.currentUser);
-          setTimeout(() => {
-            navigate("/");
-          }, 2000);
-          if (isValid) {
-            setText("");
-            setEmail("");
-            setPassword("");
-          }
+          updateProfile(auth.currentUser, {
+            displayName: text,
+            photoURL: "https://example.com/jane-q-user/profile.jpg",
+          })
+            .then( () => {
+              // Sign Up
+              const user = userCredential.user;
+              toast.success(
+                "Registation is successful Please check your mail for veryfication"
+              );
+              setLoading(false);
+              sendEmailVerification(auth.currentUser);
+              setTimeout(() => {
+                navigate("/");
+              }, 2000);
+              if (isValid) {
+                setText("");
+                setEmail("");
+                setPassword("");
+              }
+            })
+            .catch((error) => {
+              // An error occurred
+              // ...
+            });
+
         })
         .catch((error) => {
           const errorMessage = error.message;

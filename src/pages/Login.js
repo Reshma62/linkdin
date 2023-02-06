@@ -7,18 +7,19 @@ import { ProgressBar } from "react-loader-spinner";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { allUsers } from "../slices/UserSlices";
 const Login = () => {
   const auth = getAuth();
   let navigate = useNavigate();
   let dispatch = useDispatch();
-
+ let data = useSelector((state) => state.allusersInfo.userInfo);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  const [ passwordError, setPasswordError ] = useState( "" );
+  
   let handlePassword = (e) => {
     setPassword(e.target.value);
     setPasswordError("");

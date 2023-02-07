@@ -9,10 +9,13 @@ import Images from "../components/Images";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getDatabase, ref, set,push } from "firebase/database";
 const Home = () => {
   const auth = getAuth();
+  const db = getDatabase();
   const [show, setShow] = useState(false);
   const [verify, setVerify] = useState(false);
+  const [message, setMessage] = useState("");
   let navigate = useNavigate();
 
   let data = useSelector((state) => state.allusersInfo.userInfo);
@@ -27,7 +30,17 @@ const Home = () => {
       navigate("/");
     }
   }, []);
-
+  let handleTypeText = (e) => {
+    setMessage(e.target.value);
+    console.log(e.target.value);
+  }
+  let handlePost = () => {
+    set(push(ref(db, "newPost")), {
+      createPostId: data.uid,
+      message: message,
+      postBy: data.displayName,
+    });
+  };
   return (
     <>
       {verify ? (
@@ -41,12 +54,16 @@ const Home = () => {
                     new post
                   </p>
                   <input
-                    className="w-full outline-none font-nunito font-normal text-lg text-[#181818]/20"
+                    onChange={handleTypeText}
+                    className="w-full outline-none font-nunito font-normal text-lg placeholder:text-[#181818]/20"
                     type="text"
                     placeholder="Whats on your mind?"
                   />
                   <FiImage className="text-2xl absolute bottom-[45px] right-[80px]" />
-                  <RiSendPlaneFill className="bg-primary text-white p-2 text-4xl absolute bottom-[40px] right-[30px] rounded-md" />
+                  <RiSendPlaneFill
+                    onClick={handlePost}
+                    className="bg-primary text-white p-2 text-4xl absolute bottom-[40px] right-[30px] rounded-md cursor-pointer"
+                  />
                 </div>
                 <div className="bg-white pb-8 pt-4 rounded-md shadow-lg mb-9 relative ">
                   <BiDotsHorizontal

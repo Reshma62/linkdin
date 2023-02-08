@@ -75,7 +75,7 @@ const Login = () => {
           dispatch( allUsers( user ) );
           localStorage.setItem("userLoginInfo", JSON.stringify(user));
           setTimeout(() => {
-            navigate("/");
+            navigate("/home");
           }, 2000);
           if (isValid) {
             setEmail("");

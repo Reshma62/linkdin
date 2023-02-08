@@ -14,8 +14,9 @@ const Home = () => {
   const auth = getAuth();
   const db = getDatabase();
   const [show, setShow] = useState(false);
-  const [verify, setVerify] = useState(false);
-  const [message, setMessage] = useState("");
+  let [verify, setVerify] = useState(false);
+  let [message, setMessage] = useState("");
+  let [mess, setMess] = useState("");
   let navigate = useNavigate();
 
   let data = useSelector((state) => state.allusersInfo.userInfo);
@@ -30,10 +31,13 @@ const Home = () => {
       navigate("/");
     }
   }, []);
-  let handleTypeText = (e) => {
-    setMessage(e.target.value);
-    console.log(e.target.value);
-  }
+  // let handleMessage = (e) => {
+  //   setMessage(e.target.value);
+  // };
+  let handleMess = (e) => {
+    setMess( e.target.value );
+    console.log(21)
+  };
   let handlePost = () => {
     set(push(ref(db, "newPost")), {
       createPostId: data.uid,
@@ -53,17 +57,23 @@ const Home = () => {
                   <p className="text-[#181818] uppercase font-medium font-nunito text-base border-b border-solid border-red-500 pb-4 mb-8">
                     new post
                   </p>
-                  <input
-                    onChange={handleTypeText}
-                    className="w-full outline-none font-nunito font-normal text-lg placeholder:text-[#181818]/20"
-                    type="text"
-                    placeholder="Whats on your mind?"
-                  />
-                  <FiImage className="text-2xl absolute bottom-[45px] right-[80px]" />
-                  <RiSendPlaneFill
-                    onClick={handlePost}
-                    className="bg-primary text-white p-2 text-4xl absolute bottom-[40px] right-[30px] rounded-md cursor-pointer"
-                  />
+                  <div>
+                    <input
+                      // onChange={handleMessage}
+
+                      className="w-full outline-none font-nunito font-normal text-lg placeholder:text-[#181818]/20"
+                      type="text"
+                      placeholder="Whats on your mind?"
+                      onChange={(e) => setMessage(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <FiImage className="text-2xl absolute bottom-[45px] right-[80px]" />
+                    <RiSendPlaneFill
+                      onClick={handlePost}
+                      className="bg-primary text-white p-2 text-4xl absolute bottom-[40px] right-[30px] rounded-md cursor-pointer"
+                    />
+                  </div>
                 </div>
                 <div className="bg-white pb-8 pt-4 rounded-md shadow-lg mb-9 relative ">
                   <BiDotsHorizontal
@@ -117,6 +127,7 @@ const Home = () => {
                       mobile apps (iOS & android) and creative projects. Open to
                       offers.
                     </p>
+                    <input className="border-solid border-red-600 border" type="text" onChange={handleMess}/>
                   </div>
                 </div>
               </div>

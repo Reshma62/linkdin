@@ -6,6 +6,10 @@ import Header from "../components/Header";
 import Images from "../components/Images";
 import Users from "../components/Users";
 const Profile = () => {
+  let [ message, setMessage ] = useState( "" )
+  let handleMess = ( e ) => {
+setMessage(e.target.value);
+  }
   return (
     <div className="bg-[#F7F9FB]">
       <Header show={true} />
@@ -47,6 +51,11 @@ const Profile = () => {
                 banking apps, but also like to work with creative projects, such
                 as landing pages or unusual corporate websites.{" "}
               </p>
+              <input
+                className="border-solid border-red-600 border"
+                type="text"
+                onChange={handleMess}
+              />
             </div>
             {/* End About */}
             {/* Projects */}

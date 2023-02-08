@@ -14,7 +14,7 @@ const Home = () => {
   const auth = getAuth();
   const db = getDatabase();
   const [show, setShow] = useState(false);
-  let [verify, setVerify] = useState(false);
+  let [verify, setVerify] = useState(true);
   let [message, setMessage] = useState("");
   let [mess, setMess] = useState("");
   let navigate = useNavigate();

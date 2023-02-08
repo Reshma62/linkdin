@@ -82,9 +82,9 @@ const Registation = () => {
         .then((userCredential) => {
           updateProfile(auth.currentUser, {
             displayName: text,
-            photoURL: "https://example.com/jane-q-user/profile.jpg",
+            photoURL: "assets/avatar.png",
           })
-            .then( () => {
+            .then(() => {
               // Sign Up
               const user = userCredential.user;
               toast.success(

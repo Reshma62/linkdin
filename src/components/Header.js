@@ -14,7 +14,7 @@ const Header = ({ show }) => {
   let dispatch = useDispatch();
   let data = useSelector((state) => state.allusersInfo.userInfo);
   let handleLogout = () => {
-    navigate("/");
+    navigate("/login");
     dispatch(allUsers(null));
     localStorage.removeItem("userLoginInfo");
   };

@@ -1,15 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ExprDe from "../components/ExprDe";
 import Expredu from "../components/Expredu";
 import Flex from "../components/Flex";
 import Header from "../components/Header";
 import Images from "../components/Images";
 import Users from "../components/Users";
+import { useSelector } from "react-redux";
+import { MdOutlineEditCalendar } from "react-icons/md";
+import { getDatabase, ref, set, push, onValue } from "firebase/database";
 const Profile = () => {
-  let [ message, setMessage ] = useState( "" )
-  let handleMess = ( e ) => {
-setMessage(e.target.value);
-  }
+  const db = getDatabase();
+  let [bio, setBio] = useState("Add your bio");
+  let [bioshow, setBioShow] = useState([]);
+  let [biotext, setBiotext] = useState();
+  let [showBioField, setShowBioField] = useState(false);
+  let data = useSelector((state) => state.allusersInfo.userInfo);
+  let handleBioAdd = () => {
+    setShowBioField(!showBioField);
+  };
+  let handleBioText = (e) => {
+    setBiotext(e.target.value);
+  };
+  let handleUpdateBio = () => {
+    set(push(ref(db, "addBio")), {
+      bioAdd: biotext,
+      bioId: data.uid,
+    }).then(() => {
+      setShowBioField(false);
+    });
+  };
+  useEffect(() => {
+    const bioRef = ref(db, "addBio");
+    onValue(bioRef, (snapshot) => {
+      // let arr = [];
+      snapshot.forEach((item) => {
+        if (data.uid == item.val().bioId) {
+          setBio(item.val().bioAdd);
+        }
+      });
+      // setBioShow(arr);
+    });
+    console.log(bioshow);
+  }, []);
+
   return (
     <div className="bg-[#F7F9FB]">
       <Header show={true} />
@@ -27,14 +60,48 @@ setMessage(e.target.value);
                   className="w-full -mt-8 rounded-full border-4 border-solid border-white shadow-lg"
                 />
               </div>
-              <div className="mt-5">
+              <div className="mt-5 w-[600px]">
                 <h3 className="font-bold font-nunito text-xl text-[#181818]">
-                  Dmitry Kargaev
+                  {data.displayName}
                 </h3>
-                <p className="font-normal font-nunito text-base text-[#181818] max-w-[98%]  my-3">
-                  Freelance UX/UI designer, 80+ projects in web design, mobile
-                  apps (iOS & android) and creative projects. Open to offers.
+                <p className="flex gap-x-3 items-center font-normal font-nunito text-base text-[#181818] max-w-[98%]  my-3">
+                  {bio}{" "}
+                  <MdOutlineEditCalendar
+                    onClick={handleBioAdd}
+                    className="text-2xl w-[200px]"
+                  />
                 </p>
+               {/*  {bioshow.map((item) => (
+                  <p className="flex gap-x-3 items-center font-normal font-nunito text-base text-[#181818] max-w-[98%]  my-3">
+                    {item.bioAdd}{" "}
+                    <MdOutlineEditCalendar
+                      onClick={handleBioAdd}
+                      className="text-2xl w-[200px]"
+                    />
+                  </p>
+                ))} */}
+
+                {showBioField && (
+                  <div className="absolute top-1/2">
+                    <div className="bg-[red] shadow-lg w-full">
+                      <textarea
+                        name=""
+                        id=""
+                        cols="30"
+                        rows="10"
+                        defaultValue={bio}
+                        className="w-full"
+                        onChange={handleBioText}
+                      ></textarea>
+                      <button
+                        onClick={handleUpdateBio}
+                        className="bg-primary text-white font-medium font-nunito px-11 py-3 rounded-lg uppercase"
+                      >
+                        Update
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <button className="bg-primary text-white font-medium font-nunito px-11 py-3 rounded-lg uppercase">
                   Contact info
                 </button>
@@ -51,11 +118,6 @@ setMessage(e.target.value);
                 banking apps, but also like to work with creative projects, such
                 as landing pages or unusual corporate websites.{" "}
               </p>
-              <input
-                className="border-solid border-red-600 border"
-                type="text"
-                onChange={handleMess}
-              />
             </div>
             {/* End About */}
             {/* Projects */}

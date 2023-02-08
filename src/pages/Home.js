@@ -6,7 +6,7 @@ import { RiSendPlaneFill } from "react-icons/ri";
 import { AiOutlineEdit, AiTwotoneDelete } from "react-icons/ai";
 import { BiDotsHorizontal } from "react-icons/bi";
 import Images from "../components/Images";
-import { useSelector } from "react-redux";
+import { useSelector, } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getDatabase, ref, set, push, onValue } from "firebase/database";
@@ -24,7 +24,8 @@ const Home = () => {
   let [verify, setVerify] = useState(false);
   let [showPost, setShowPost] = useState([]);
   let [message, setMessage] = useState("");
-  let [image, setImage] = useState("");
+  let [ image, setImage ] = useState( "" );
+  let [bio, setBio] = useState("Add your bio");
   let navigate = useNavigate();
 
   let data = useSelector((state) => state.allusersInfo.userInfo);
@@ -101,7 +102,20 @@ const Home = () => {
     if (!data) {
       navigate("/login");
     }
-  }, []);
+  }, [] );
+ useEffect(() => {
+   const bioRef = ref(db, "addBio");
+   onValue(bioRef, (snapshot) => {
+     // let arr = [];
+     snapshot.forEach((item) => {
+       if (data.uid == item.val().bioId) {
+         setBio(item.val().bioAdd);
+       }
+     });
+     // setBioShow(arr);
+   });
+  //  console.log(bioshow);
+ }, []);
 
   return (
     <>
@@ -166,7 +180,7 @@ const Home = () => {
                   )}
                   <Flex className="items-center px-8 py-5 gap-5 border-t border-solid border-red-500">
                     <div>
-                      <Images imgsrc="assets/Photo.png" />
+                      <Images imgsrc={data.photoURL} />
                     </div>
                     <div>
                       <h3 className="font-bold font-nunito text-base text-[#181818]">
@@ -238,11 +252,10 @@ const Home = () => {
                 </div>
                 <div className="text-center">
                   <h3 className="font-bold font-nunito text-base text-[#181818]">
-                    Dmitry Kargaev
+                    {data.displayName}
                   </h3>
                   <p className="font-normal font-nunito text-sm text-[#181818] max-w-[300px] mx-auto mt-4">
-                    Freelance UX/UI designer, 80+ projects in web design, mobile
-                    apps (iOS & android) and creative projects. Open to offers.
+                    {bio}
                   </p>
                 </div>
               </div>

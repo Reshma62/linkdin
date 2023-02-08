@@ -19,7 +19,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [ passwordError, setPasswordError ] = useState( "" );
-  
+
   let handlePassword = (e) => {
     setPassword(e.target.value);
     setPasswordError("");
@@ -75,7 +75,7 @@ const Login = () => {
           dispatch( allUsers( user ) );
           localStorage.setItem("userLoginInfo", JSON.stringify(user));
           setTimeout(() => {
-            navigate("/home");
+            navigate("/");
           }, 2000);
           if (isValid) {
             setEmail("");

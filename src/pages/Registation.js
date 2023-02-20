@@ -12,8 +12,10 @@ import {
   sendEmailVerification,
   updateProfile,
 } from "firebase/auth";
+import { getDatabase, ref, set,push } from "firebase/database";
 const Registation = () => {
   const auth = getAuth();
+  const db = getDatabase();
   let navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [text, setText] = useState("");
@@ -100,7 +102,16 @@ const Registation = () => {
                 setEmail("");
                 setPassword("");
               }
-            })
+            } ).then( () => {
+              const user = userCredential.user;
+              console.log( user );
+               set(ref(db, "users/" + user.uid), {
+                 username: user.displayName,
+                 email: user.email,
+                 profile_picture: user.photoURL,
+               });
+
+            } )
             .catch((error) => {
               // An error occurred
               // ...

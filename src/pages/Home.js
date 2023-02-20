@@ -6,10 +6,17 @@ import { RiSendPlaneFill } from "react-icons/ri";
 import { AiOutlineEdit, AiTwotoneDelete } from "react-icons/ai";
 import { BiDotsHorizontal } from "react-icons/bi";
 import Images from "../components/Images";
-import { useSelector, } from "react-redux";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getDatabase, ref, set, push, onValue } from "firebase/database";
+import { getAuth, onAuthStateChanged, updateProfile } from "firebase/auth";
+import {
+  getDatabase,
+  ref,
+  set,
+  push,
+  onValue,
+  remove,
+} from "firebase/database";
 import ModalImage from "react-modal-image";
 import {
   getStorage,
@@ -24,7 +31,7 @@ const Home = () => {
   let [verify, setVerify] = useState(false);
   let [showPost, setShowPost] = useState([]);
   let [message, setMessage] = useState("");
-  let [ image, setImage ] = useState( "" );
+  let [image, setImage] = useState("");
   let [bio, setBio] = useState("Add your bio");
   let navigate = useNavigate();
 
@@ -33,15 +40,27 @@ const Home = () => {
     setMessage(e.target.value);
   };
   let handlePost = () => {
-    set(push(ref(db, "newPost")), {
-      createPostId: data.uid,
-      message: message,
-      postBy: data.displayName,
-      image: image,
-    });
+    updateProfile(auth.currentUser, {
+      photoURL: data.photoURL,
+    })
+      .then(() => {
+        set(push(ref(db, "newPost")), {
+          createPostId: data.uid,
+          message: message,
+          postBy: data.displayName,
+          image: image,
+          postbyPic: data.photoURL,
+        });
+      })
+      .catch((error) => {
+        // An error occurred
+        // ...
+      });
+
     setImage("");
     setMessage("");
   };
+
   // console.log(data)
   let uploadImg = (e) => {
     const storage = getStorage();
@@ -68,11 +87,8 @@ const Home = () => {
         // Handle unsuccessful uploads
       },
       () => {
-        // Handle successful uploads on complete
-        // For instance, get the download URL: https://firebasestorage.googleapis.com/...
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           setImage(downloadURL);
-          console.log("File available at", downloadURL);
         });
       }
     );
@@ -102,20 +118,20 @@ const Home = () => {
     if (!data) {
       navigate("/login");
     }
-  }, [] );
- useEffect(() => {
-   const bioRef = ref(db, "addBio");
-   onValue(bioRef, (snapshot) => {
-     // let arr = [];
-     snapshot.forEach((item) => {
-       if (data.uid == item.val().bioId) {
-         setBio(item.val().bioAdd);
-       }
-     });
-     // setBioShow(arr);
-   });
-  //  console.log(bioshow);
- }, []);
+  }, []);
+  useEffect(() => {
+    const bioRef = ref(db, "addBio");
+    onValue(bioRef, (snapshot) => {
+      // let arr = [];
+      snapshot.forEach((item) => {
+        if (data.uid == item.val().bioId) {
+          setBio(item.val().bioAdd);
+        }
+      });
+      // setBioShow(arr);
+    });
+    //  console.log(bioshow);
+  }, []);
 
   return (
     <>
@@ -164,23 +180,31 @@ const Home = () => {
               {/* post */}
               {showPost.map((item) => (
                 <div className="bg-white pb-8 pt-4 rounded-md shadow-lg mb-9 relative ">
-                  <BiDotsHorizontal
-                    onClick={() => setShow(!show)}
-                    className="text-right ml-auto text-3xl mb-5 mr-6 cursor-pointer"
-                  />
-                  {show && (
-                    <div className="absolute right-0 top-12 bg-[#f4f4f4] border border-solid border-[#181818] p-5 w-[180px] rounded-lg">
-                      <p className="border-solid border-b border-[#ddd] pb-3 mb-2 flex items-center gap-x-3">
-                        Edit Post <AiOutlineEdit className="text-lg" />
-                      </p>
-                      <p className=" flex items-center gap-x-3">
-                        Delete Post <AiTwotoneDelete className="text-lg" />
-                      </p>
-                    </div>
+                  {data.uid == item.createPostId && (
+                    <BiDotsHorizontal
+                      onClick={() => setShow(!show)}
+                      className="text-right ml-auto text-3xl mb-5 mr-6 cursor-pointer"
+                    />
                   )}
+
+                  {show &&
+                    data.uid ==
+                      item.createPostId &&(
+                        <div className="absolute right-0 top-12 bg-[#f4f4f4] border border-solid border-[#181818] p-5 w-[180px] rounded-lg">
+                          <p className="border-solid border-b border-[#ddd] pb-3 mb-2 flex items-center gap-x-3">
+                            Edit Post <AiOutlineEdit className="text-lg" />
+                          </p>
+                          <p className=" flex items-center gap-x-3">
+                            Delete Post <AiTwotoneDelete className="text-lg" />
+                          </p>
+                        </div>
+                      )}
                   <Flex className="items-center px-8 py-5 gap-5 border-t border-solid border-red-500">
                     <div>
-                      <Images imgsrc={data.photoURL} />
+                      <Images
+                        className={`w-[100px] rounded-full`}
+                        imgsrc={item.postbyPic}
+                      />
                     </div>
                     <div>
                       <h3 className="font-bold font-nunito text-base text-[#181818]">
@@ -246,8 +270,8 @@ const Home = () => {
                 <Images imgsrc="assets/cover.png" className="w-full" />
                 <div className="flex justify-center -mt-12 mb-4">
                   <Images
-                    imgsrc="assets/profile.png"
-                    className="shadow-lg rounded-full"
+                    imgsrc={data.photoURL}
+                    className="shadow-lg rounded-full w-[75px]"
                   />
                 </div>
                 <div className="text-center">

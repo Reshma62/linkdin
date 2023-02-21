@@ -23,17 +23,21 @@ import {
   uploadString,
   getDownloadURL,
 } from "firebase/storage";
+
 import { getAuth, signOut, updateProfile } from "firebase/auth";
 const Profile = () => {
   const auth = getAuth();
   const db = getDatabase();
+  const user = auth.currentUser;
   const [image, setImage] = useState("");
   const [cropData, setCropData] = useState("");
   const [cropper, setCropper] = useState("");
   let data = useSelector((state) => state.allusersInfo.userInfo);
   const [bio, setBio] = useState("");
   const [showBioField, setShowBioField] = useState(false);
-  let handleBioAdd = () => {};
+  let handleBioAdd = () => {
+    setShowBioField(!showBioField);
+  };
   let handleBioText = () => {};
   let handleUpdateBio = () => {};
   let handleUpdateBio2 = () => {};
@@ -72,22 +76,46 @@ const Profile = () => {
         })
           .then(() => {
             setShowPopUp(false);
+            const users = ref(db, "users/" + user.uid);
+            update(ref(db, "users/" + user.uid), {
+              profile_picture: downloadURL,
+            });
+           /*  update(ref(db, ref(db, "users/" + user.uid)), {
+              profile_picture: downloadURL,
+            }); */
           })
-          .catch((error) => {
-            // An error occurred
-            // ...
-          });
+          .catch((error) => {});
       });
     });
   };
   const [userList, setUserList] = useState([]);
+  /*  useEffect(() => {
+    updateProfile(auth.currentUser, {
+      photoURL: data.photoURL,
+    })
+      .then(() => {
+        const users = ref(db, "users/");
+        onValue(users, (snapshot) => {
+          let arr = [];
+          snapshot.forEach((item) => {
+            arr.push(item.val());
+          });
+
+          setUserList(arr);
+        });
+      })
+      .catch((error) => {
+        // An error occurred
+        // ...
+      });
+  }, [data.photoURL]); */
   useEffect(() => {
     const users = ref(db, "users/");
     onValue(users, (snapshot) => {
       let arr = [];
       snapshot.forEach((item) => {
         arr.push(item.val());
-      } );
+      });
 
       setUserList(arr);
     });
@@ -331,12 +359,26 @@ const Profile = () => {
                 </h2>
                 {userList.map((item) => (
                   <Users
-                    img="assets/profile.png"
-                    userName="Darlene Black "
+                    img={item.profile_picture}
+                    userName={item.username}
                     userBio="HR-manager, 10 000 connec..."
                     addFriend="Add Friend"
                   />
                 ))}
+                {/* {user !== null &&
+                  user.providerData.forEach((profile) => {
+                    console.log("Sign-in provider: " + profile.providerId);
+                    console.log("  Provider-specific UID: " + profile.uid);
+                    console.log("  Name: " + profile.displayName);
+                    console.log("  Email: " + profile.email);
+                    console.log("  Photo URL: " + profile.photoURL);
+                    <Users
+                      img={profile.photoURL}
+                      userName={profile.displayName}
+                      userBio="HR-manager, 10 000 connec..."
+                      addFriend="Add Friend"
+                    />;
+                  })} */}
               </div>
             </div>
           </Flex>

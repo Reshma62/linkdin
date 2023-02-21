@@ -12,11 +12,13 @@ import {
   sendEmailVerification,
   updateProfile,
 } from "firebase/auth";
-import { getDatabase, ref, set,push } from "firebase/database";
+import { getDatabase, ref, set, push } from "firebase/database";
+import { useSelector } from "react-redux";
 const Registation = () => {
   const auth = getAuth();
   const db = getDatabase();
   let navigate = useNavigate();
+  let data = useSelector((state) => state.allusersInfo.userInfo);
   const [loading, setLoading] = useState(false);
   const [text, setText] = useState("");
   const [email, setEmail] = useState("");
@@ -84,7 +86,7 @@ const Registation = () => {
         .then((userCredential) => {
           updateProfile(auth.currentUser, {
             displayName: text,
-            photoURL: "assets/avatar.png",
+            photoURL:"assets/avatar.png",
           })
             .then(() => {
               // Sign Up
@@ -102,21 +104,20 @@ const Registation = () => {
                 setEmail("");
                 setPassword("");
               }
-            } ).then( () => {
+            })
+            .then(() => {
               const user = userCredential.user;
-              console.log( user );
-               set(ref(db, "users/" + user.uid), {
-                 username: user.displayName,
-                 email: user.email,
-                 profile_picture: user.photoURL,
-               });
-
-            } )
+              console.log(user);
+              set(ref(db, "users/" + user.uid), {
+                username: user.displayName,
+                email: user.email,
+                profile_picture: user.photoURL,
+              });
+            })
             .catch((error) => {
               // An error occurred
               // ...
             });
-
         })
         .catch((error) => {
           const errorMessage = error.message;

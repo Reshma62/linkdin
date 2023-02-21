@@ -6,7 +6,7 @@ const Users = ({img, userName, userBio, addFriend}) => {
   return (
     <Flex className="gap-x-4 items-center mb-4">
       <div>
-        <Images imgsrc={img} />
+        <Images  imgsrc={img} className="rounded-full w-[100px]"/>
       </div>
       <div>
         <h3 className="font-bold font-nunito text-base text-[#181818]">

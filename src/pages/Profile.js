@@ -7,120 +7,11 @@ import Images from "../components/Images";
 import Users from "../components/Users";
 import { useSelector } from "react-redux";
 import { MdOutlineEditCalendar } from "react-icons/md";
-import {
-  getDatabase,
-  ref,
-  set,
-  push,
-  onValue,
-  update,
-} from "firebase/database";
+
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
-import {
-  getStorage,
-  ref as stgref,
-  uploadString,
-  getDownloadURL,
-} from "firebase/storage";
 
-import { getAuth, signOut, updateProfile } from "firebase/auth";
 const Profile = () => {
-  const auth = getAuth();
-  const db = getDatabase();
-  const user = auth.currentUser;
-  const [image, setImage] = useState("");
-  const [cropData, setCropData] = useState("");
-  const [cropper, setCropper] = useState("");
-  let data = useSelector((state) => state.allusersInfo.userInfo);
-  const [bio, setBio] = useState("");
-  const [showBioField, setShowBioField] = useState(false);
-  let handleBioAdd = () => {
-    setShowBioField(!showBioField);
-  };
-  let handleBioText = () => {};
-  let handleUpdateBio = () => {};
-  let handleUpdateBio2 = () => {};
-
-  let [showPopUp, setShowPopUp] = useState(false);
-  let handleProfilePic = () => {
-    setShowPopUp(true);
-  };
-  const onChange = (e) => {
-    e.preventDefault();
-    let files;
-    if (e.dataTransfer) {
-      files = e.dataTransfer.files;
-    } else if (e.target) {
-      files = e.target.files;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      setImage(reader.result);
-    };
-    reader.readAsDataURL(files[0]);
-  };
-  const getCropData = () => {
-    if (typeof cropper !== "undefined") {
-      setCropData(cropper.getCroppedCanvas().toDataURL());
-    }
-
-    const storage = getStorage();
-    const storageRef = stgref(storage, "proflie-pic/" + auth.currentUser.uid);
-    const message4 = cropper.getCroppedCanvas().toDataURL();
-    uploadString(storageRef, message4, "data_url").then((snapshot) => {
-      console.log("Uploaded a data_url string!");
-      getDownloadURL(storageRef).then((downloadURL) => {
-        updateProfile(auth.currentUser, {
-          photoURL: downloadURL,
-        })
-          .then(() => {
-            setShowPopUp(false);
-            const users = ref(db, "users/" + user.uid);
-            update(ref(db, "users/" + user.uid), {
-              profile_picture: downloadURL,
-            });
-           /*  update(ref(db, ref(db, "users/" + user.uid)), {
-              profile_picture: downloadURL,
-            }); */
-          })
-          .catch((error) => {});
-      });
-    });
-  };
-  const [userList, setUserList] = useState([]);
-  /*  useEffect(() => {
-    updateProfile(auth.currentUser, {
-      photoURL: data.photoURL,
-    })
-      .then(() => {
-        const users = ref(db, "users/");
-        onValue(users, (snapshot) => {
-          let arr = [];
-          snapshot.forEach((item) => {
-            arr.push(item.val());
-          });
-
-          setUserList(arr);
-        });
-      })
-      .catch((error) => {
-        // An error occurred
-        // ...
-      });
-  }, [data.photoURL]); */
-  useEffect(() => {
-    const users = ref(db, "users/");
-    onValue(users, (snapshot) => {
-      let arr = [];
-      snapshot.forEach((item) => {
-        arr.push(item.val());
-      });
-
-      setUserList(arr);
-    });
-  }, []);
-
   return (
     <div className="">
       <div className="bg-[#F7F9FB] ">
@@ -136,52 +27,39 @@ const Profile = () => {
               <Flex className="px-6 bg-white pb-9 gap-x-6 items-center mb-5">
                 <div className="w-[170px]  ">
                   <Images
-                    onClick={handleProfilePic}
-                    imgsrc={data.photoURL}
+                    imgsrc="assets/avatar.png"
                     className="w-full -mt-8 rounded-full border-4 border-solid border-white shadow-lg"
                   />
                 </div>
 
                 <div className="mt-5 w-[600px]">
                   <h3 className="font-bold font-nunito text-xl text-[#181818]">
-                    {data.displayName}
+                    gfgdfgd
                   </h3>
 
                   <p className="flex gap-x-3 items-center font-normal font-nunito text-base text-[#181818] max-w-[98%]  my-3">
-                    {bio}{" "}
-                    <MdOutlineEditCalendar
-                      onClick={handleBioAdd}
-                      className="text-2xl w-[200px]"
-                    />
+                    jkhjkgjhg
+                    <MdOutlineEditCalendar className="text-2xl w-[200px]" />
                   </p>
 
-                  {showBioField && (
-                    <div className="absolute top-[350px]">
-                      <div className="bg-[red] shadow-lg w-full">
-                        <textarea
-                          name=""
-                          id=""
-                          cols="30"
-                          rows="10"
-                          defaultValue={bio}
-                          className="w-full"
-                          onChange={handleBioText}
-                        ></textarea>
-                        <button
-                          onClick={handleUpdateBio}
-                          className="bg-primary text-white font-medium font-nunito px-11 py-3 rounded-lg uppercase"
-                        >
-                          Update
-                        </button>
-                        <button
-                          onClick={handleUpdateBio2}
-                          className="bg-primary text-white font-medium font-nunito px-11 py-3 rounded-lg uppercase"
-                        >
-                          Update2
-                        </button>
-                      </div>
+                  {/* <div className="absolute top-[350px]">
+                    <div className="bg-[red] shadow-lg w-full">
+                      <textarea
+                        name=""
+                        id=""
+                        cols="30"
+                        rows="10"
+                        className="w-full"
+                      ></textarea>
+                      <button className="bg-primary text-white font-medium font-nunito px-11 py-3 rounded-lg uppercase">
+                        Update
+                      </button>
+                      <button className="bg-primary text-white font-medium font-nunito px-11 py-3 rounded-lg uppercase">
+                        Update2
+                      </button>
                     </div>
-                  )}
+                  </div> */}
+
                   <button className="bg-primary text-white font-medium font-nunito px-11 py-3 rounded-lg uppercase">
                     Contact info
                   </button>
@@ -357,81 +235,43 @@ const Profile = () => {
                 <h2 className="font-bold font-nunito text-xl text-[#181818] mb-5 border-b border-solid border-slate-300 pb-3">
                   All users
                 </h2>
-                {userList.map((item) => (
-                  <Users
-                    img={item.profile_picture}
-                    userName={item.username}
-                    userBio="HR-manager, 10 000 connec..."
-                    addFriend="Add Friend"
-                  />
-                ))}
-                {/* {user !== null &&
-                  user.providerData.forEach((profile) => {
-                    console.log("Sign-in provider: " + profile.providerId);
-                    console.log("  Provider-specific UID: " + profile.uid);
-                    console.log("  Name: " + profile.displayName);
-                    console.log("  Email: " + profile.email);
-                    console.log("  Photo URL: " + profile.photoURL);
-                    <Users
-                      img={profile.photoURL}
-                      userName={profile.displayName}
-                      userBio="HR-manager, 10 000 connec..."
-                      addFriend="Add Friend"
-                    />;
-                  })} */}
+
+                <Users
+                  img="assets/avatar.png"
+                  userName="userName"
+                  userBio="HR-manager, 10 000 connec..."
+                  addFriend="Add Friend"
+                />
               </div>
             </div>
           </Flex>
         </div>
       </div>
       {/* Profile pic uploasd */}
-      {showPopUp && (
-        <div className="absolute top-0 left-0 z-50 bg-slate-200 w-full h-screen flex justify-center items-center">
-          <div className="w-1/2 bg-gray-400 mx-auto flex justify-center items-center flex-col p-5 rounded-xl">
-            <h2 className="text-3xl font-nunito font-bold py-3">
-              Update your profile photo
-            </h2>
-            {image ? (
-              <div
-                className="img-preview rounded-full bg-red-200 overflow-hidden my-8"
-                style={{ width: "100px", float: "left", height: "100px" }}
-              ></div>
-            ) : (
-              <Images
-                imgsrc={data.photoURL}
-                className={`w-[100px] rounded-full my-8`}
-              />
-            )}
 
-            {image && (
-              <Cropper
-                style={{ height: 200, width: "100%" }}
-                initialAspectRatio={1}
-                preview=".img-preview"
-                src={image}
-                viewMode={1}
-                guides={true}
-                minCropBoxHeight={10}
-                minCropBoxWidth={10}
-                background={false}
-                responsive={true}
-                checkOrientation={false}
-                onInitialized={(instance) => {
-                  setCropper(instance);
-                }}
-              />
-            )}
+      {/* <div className="absolute top-0 left-0 z-50 bg-slate-200 w-full h-screen flex justify-center items-center">
+        <div className="w-1/2 bg-gray-400 mx-auto flex justify-center items-center flex-col p-5 rounded-xl">
+          <h2 className="text-3xl font-nunito font-bold py-3">
+            Update your profile photo
+          </h2>
 
-            <input type="file" onChange={onChange} className="mb-8" />
-            <button
-              onClick={getCropData}
-              className="bg-primary text-white font-medium font-nunito px-11 py-3 rounded-lg uppercase"
-            >
-              Upload
-            </button>
-          </div>
+          <div
+            className="img-preview rounded-full bg-red-200 overflow-hidden my-8"
+            style={{ width: "100px", float: "left", height: "100px" }}
+          ></div>
+
+          <Images
+            imgsrc="assets/avatar.png"
+            className={`w-[100px] rounded-full my-8`}
+          />
+
+          <input type="file" className="mb-8" />
+          <button className="bg-primary text-white font-medium font-nunito px-11 py-3 rounded-lg uppercase">
+            Upload
+          </button>
         </div>
-      )}
+      </div> */}
+
       {/* Profile pic uploasd End*/}
     </div>
   );

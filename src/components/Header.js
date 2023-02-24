@@ -23,7 +23,7 @@ const Header = ({ show }) => {
     <nav className="px-14 bg-white">
       <Flex className="justify-between items-center h-20">
         <Link
-          to="/home"
+          to="/"
           className="w-[100px] grid h-full items-center border-r border-solid border-[#F4F4F4]"
         >
           <Images imgsrc="assets/logo.png" />

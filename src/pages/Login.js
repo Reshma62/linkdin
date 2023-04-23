@@ -13,7 +13,6 @@ const Login = () => {
   const auth = getAuth();
   let navigate = useNavigate();
   let dispatch = useDispatch();
- let data = useSelector((state) => state.allusersInfo.userInfo);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -75,7 +74,7 @@ const Login = () => {
           dispatch( allUsers( user ) );
           localStorage.setItem("userLoginInfo", JSON.stringify(user));
           setTimeout(() => {
-            navigate("/home");
+            navigate("/");
           }, 2000);
           if (isValid) {
             setEmail("");

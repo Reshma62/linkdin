@@ -13,11 +13,13 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { getDatabase, ref, set, push } from "firebase/database";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { allUsers } from "../slices/UserSlices";
 const Registation = () => {
   const auth = getAuth();
   const db = getDatabase();
   let navigate = useNavigate();
+  let dispatch = useDispatch();
   let data = useSelector((state) => state.allusersInfo.userInfo);
   const [loading, setLoading] = useState(false);
   const [text, setText] = useState("");
@@ -95,9 +97,11 @@ const Registation = () => {
                 "Registation is successful Please check your mail for veryfication"
               );
               setLoading(false);
-              sendEmailVerification(auth.currentUser);
+              sendEmailVerification( auth.currentUser );
+              dispatch(allUsers(user));
+              localStorage.setItem("userLoginInfo", JSON.stringify(user));
               setTimeout(() => {
-                navigate("/");
+                navigate("/login");
               }, 2000);
               if (isValid) {
                 setText("");
@@ -112,6 +116,7 @@ const Registation = () => {
                 username: user.displayName,
                 email: user.email,
                 profile_picture: user.photoURL,
+                userId:user.uid,
               });
             })
             .catch((error) => {
@@ -163,7 +168,8 @@ const Registation = () => {
             type="email"
             label="Email Address"
             onChange={handleEmail}
-            value={email}
+            value={ email }
+            name={email}
           />
           {emailError && (
             <p className="bg-red-600 text-white mb-6 p-2.5 -mt-3">
@@ -174,7 +180,6 @@ const Registation = () => {
             type="text"
             label="Full name"
             onChange={handleFullname}
-            name="email"
             value={text}
           />
           {textError && (

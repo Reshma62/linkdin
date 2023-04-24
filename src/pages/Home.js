@@ -3,8 +3,6 @@ import Flex from "../components/Flex";
 import Header from "../components/Header";
 import { FiImage } from "react-icons/fi";
 import { RiSendPlaneFill } from "react-icons/ri";
-
-import Images from "../components/Images";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -25,8 +23,12 @@ import {
 import { allUsers } from "../slices/UserSlices";
 import Loader from "../components/Loader";
 import Post from "../components/Post";
-import { getCurrentUser } from "../Api/functional";
 import { v4 as uuidv4 } from "uuid";
+import RightSidebarHome from "../components/RightSidebarHome";
+import { AiOutlineCloseCircle } from "react-icons/ai";
+import { BsEmojiSmile } from "react-icons/bs";
+import EmojiPicker from "emoji-picker-react";
+import { getCurrentUser } from "../Api/functional";
 const Home = () => {
   const auth = getAuth();
   const db = getDatabase();
@@ -35,12 +37,12 @@ const Home = () => {
   let dispatch = useDispatch();
   const [verify, setVerify] = useState("");
   const [loder, setLoder] = useState(true);
+  const [showEmoji, setShowEmoji] = useState(false);
 
   let data = useSelector((state) => state.allusersInfo.userInfo);
 
   const [input, setInput] = useState("");
   const [img, setImg] = useState(null);
-  const [currentUser, setCurrentUser] = useState({});
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -65,14 +67,17 @@ const Home = () => {
   let handlePost = (e) => {
     setInput(e.target.value);
   };
+  let sendEmoji = (emoji) => {
+    setInput(input+emoji.emoji);
+  };
   let postImg = (e) => {
     setImg(e.target.files[0]);
   };
   let handlePostSend = () => {
     // if (input) {
     if (img) {
-      console.log("ami if");
-      const storageRef = StroageRef(storage, "postImg/" + uuidv4());
+      console.log("ami if",img.name);
+      const storageRef = StroageRef(storage, "postImg/" + img.name);
 
       const uploadTask = uploadBytesResumable(storageRef, img);
       uploadTask.on(
@@ -97,27 +102,27 @@ const Home = () => {
           // Handle successful uploads on complete
           // For instance, get the download URL: https://firebasestorage.googleapis.com/...
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            console.log( "File available at", downloadURL );
-             set(push(ref(db, "post")), {
-               userId: data.uid,
-               userName: data.displayName,
-               postMess: input,
-               postImg:downloadURL,
-               userPhoto: data.photoURL,
-               timeStamp: serverTimestamp(),
-               date: `${new Date().getFullYear()} ${
-                 new Date().getMonth() + 1
-               } ${new Date().getDate()} ${new Date().getHours()}:${new Date().getMinutes()}`,
-             } );
-             setInput("");
-             setImg("");
+            console.log("File available at", downloadURL);
+            set(push(ref(db, "post")), {
+              userId: data.uid,
+              userName: data.displayName,
+              postMess: input,
+              postImg: downloadURL,
+              userPhoto: data.photoURL,
+              timeStamp: serverTimestamp(),
+              date: `${new Date().getFullYear()} ${
+                new Date().getMonth() + 1
+              } ${new Date().getDate()} ${new Date().getHours()}:${new Date().getMinutes()}`,
+            });
+            setInput("");
+            setImg("");
             console.log("ami img");
           });
         }
       );
     } else {
       console.log("ami else");
-       set(push(ref(db, "post")), {
+      set(push(ref(db, "post")), {
         userId: data.uid,
         userName: data.displayName,
         postMess: input,
@@ -134,9 +139,7 @@ const Home = () => {
       alert("Write somthing");
     } */
   };
-  useEffect(() => {
-    getCurrentUser(data, setCurrentUser);
-  }, []);
+
   // console.log(currentUser, "currentUser home");
   const [allPosts, setAllPosts] = useState([]);
   useEffect(() => {
@@ -150,6 +153,10 @@ const Home = () => {
     });
   }, []);
   // console.log(allPosts, "Post all");
+  const [currentUser, setCurrentUser] = useState({});
+  useEffect(() => {
+    getCurrentUser(data, setCurrentUser);
+  }, []);
   return (
     <>
       {loder ? (
@@ -181,18 +188,37 @@ const Home = () => {
                     <input
                       className="w-full outline-none font-nunito font-normal text-lg placeholder:text-[#181818]/20"
                       type="text"
-                      placeholder="Whats on your mind?"
+                      placeholder={`Whats on your mind ${currentUser.username}?`}
                       onChange={handlePost}
                       value={input}
+                      onFocus={() => setShowEmoji(false)}
                     />
                   </div>
                   <div>
+                    <BsEmojiSmile
+                      onClick={() => setShowEmoji(!showEmoji)}
+                      className="cursor-pointer text-2xl absolute bottom-[45px] right-[120px]"
+                    />
+                    {showEmoji && (
+                      <div className="absolute top-[140px] right-[10px] z-50">
+                        <EmojiPicker
+                          onEmojiClick={(emoji) => sendEmoji(emoji)}
+                        />
+                      </div>
+                    )}
+
                     {img && (
-                      <img
-                        src={URL.createObjectURL(img)}
-                        alt=""
-                        className="w-[200px] h-[200px]"
-                      />
+                      <div className="relative w-[200px] h-[200px]">
+                        <img
+                          src={URL.createObjectURL(img)}
+                          alt=""
+                          className="w-full"
+                        />
+                        <AiOutlineCloseCircle
+                          onClick={() => setImg(null)}
+                          className=" text-3xl absolute -top-5 -right-10 cursor-pointer"
+                        />
+                      </div>
                     )}
 
                     <label>
@@ -203,7 +229,7 @@ const Home = () => {
                         id=""
                         className="hidden"
                       />
-                      <FiImage className="text-2xl absolute bottom-[45px] right-[80px]" />
+                      <FiImage className="text-2xl absolute bottom-[45px] right-[80px] cursor-pointer" />
                     </label>
                     <div onClick={handlePostSend}>
                       {" "}
@@ -219,25 +245,7 @@ const Home = () => {
                   ))}
               </div>
               {/* Right SideBar */}
-              <div className="w-1/4">
-                <div className="bg-white pb-8 rounded-md shadow-lg relative mb-9">
-                  <Images imgsrc="assets/cover.png" className="w-full" />
-                  <div className="flex justify-center -mt-12 mb-4">
-                    <Images
-                      imgsrc={currentUser.profile_picture}
-                      className="shadow-lg rounded-full w-[75px]"
-                    />
-                  </div>
-                  <div className="text-center">
-                    <h3 className="font-bold font-nunito text-base text-[#181818]">
-                      {currentUser.username}
-                    </h3>
-                    <p className="font-normal font-nunito text-sm text-[#181818] max-w-[300px] mx-auto mt-4">
-                      jhjhg
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <RightSidebarHome />
             </Flex>
           </div>
         </div>

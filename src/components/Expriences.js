@@ -1,14 +1,31 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AddExprience from "./AddExprience";
 import Modal from "./Modal";
 import ExprDe from "./ExprDe";
 import Expredu from "./Expredu";
-
+import { getDatabase, ref, onValue } from "firebase/database";
+import { useSelector } from "react-redux";
 const Expriences = () => {
+  const db = getDatabase();
   const [isOpen, setIsOpen] = useState(false);
+  const [allExprience, setAllExprience] = useState([]);
+  let data = useSelector((state) => state.allusersInfo.userInfo);
   function toggleModal() {
     setIsOpen(!isOpen);
   }
+  useEffect(() => {
+    const expriceRef = ref(db, "exprience/");
+    onValue(expriceRef, (snapshot) => {
+      let arr = [];
+      snapshot.forEach((item) => {
+        if (data.uid == item.val().userId) {
+          arr.push({ ...item.val(), expId: item.key });
+        }
+      });
+      setAllExprience(arr);
+    });
+  }, []);
+
   return (
     <>
       <div className="p-9 bg-white rounded-lg mb-5">
@@ -17,22 +34,19 @@ const Expriences = () => {
           button={`Add Expriences`}
           heading="Experience"
         ></Expredu>
-        <ExprDe
-          imgsrc="assets/logo.png"
-          jobTitle="Freelance UX/UI designer"
-          year="3 yrs 3 mos"
-          description="Work with clients and web studios as freelancer.  Work in next areas: eCommerce web projects; creative landing pages; iOs and Android apps; corporate web sites and corporate identity sometimes."
-          place="Self Employed"
-          time="Jun 2016 — Present"
-        />
-        <ExprDe
-          imgsrc="assets/logo.png"
-          jobTitle="Freelance UX/UI designer"
-          year="3 yrs 3 mos"
-          description="Work with clients and web studios as freelancer.  Work in next areas: eCommerce web projects; creative landing pages; iOs and Android apps; corporate web sites and corporate identity sometimes."
-          place="Self Employed"
-          time="Jun 2016 — Present"
-        />
+        {allExprience.length == 0 ? (
+          <h1>No exprience add</h1>
+        ) : (
+          allExprience.map((item) => (
+            <ExprDe
+              imgsrc={item.projectImg}
+              jobTitle={item.projectTitle}
+              year={item.workSystem}
+              description={item.workDetails}
+              time={item.workDuration}
+            />
+          ))
+        )}
       </div>
       {isOpen && (
         <Modal toggleModal={toggleModal} title="Add Your Recent Work">

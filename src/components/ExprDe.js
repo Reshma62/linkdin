@@ -6,10 +6,10 @@ const ExprDe = ({ imgsrc, jobTitle, year, description, place, time }) => {
   return (
     <>
       <Flex className="gap-x-5 mb-5">
-        <div className="w-[100px]">
-          <Images imgsrc={imgsrc} />
+        <div className="w-[50px] h-[50px]">
+          <Images className={`w-full h-full border border-solid border-black rounded-full`} imgsrc={imgsrc} />
         </div>
-        <div>
+        <div className="w-[80%]">
           <h2 className="font-bold font-nunito text-lg text-[#181818]">
             {jobTitle}
           </h2>

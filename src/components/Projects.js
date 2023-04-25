@@ -42,7 +42,8 @@ const Projects = () => {
       </Flex>
 
       <Flex className={`flex-wrap gap-8 h-[500px] overflow-y-auto `}>
-        {projects
+        {projects.length==0 ? <h1>No projects add</h1> :
+        projects
           .sort((a, b) => b.timeStamp - a.timeStamp)
           .map((item) => (
             <div className="w-[30%]">

@@ -47,8 +47,8 @@ const Projects = () => {
           .sort((a, b) => b.timeStamp - a.timeStamp)
           .map((item) => (
             <div className="w-[30%]">
-              <div className="mb-4 max-w-full">
-                <Images imgsrc={item.projectImg} className="w-full" />
+              <div className="mb-4 max-w-full h-[200px] border border-solid border-black">
+                <Images imgsrc={item.projectImg} className="w-full object-cover" />
               </div>
               <h4 className="font-bold font-nunito text-base text-[#181818]">
                 {item.projectTitle}

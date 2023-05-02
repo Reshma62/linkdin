@@ -25,7 +25,7 @@ const AddProjects = ({ setIsOpen }) => {
     setImg(e.target.files[0]);
   };
   let handleAddProjects = () => {
-    const storageRef = strRef(storage, "projcetsImg/" +uuid());
+    const storageRef = strRef(storage, "projcetsImg/" + img.name);
 
     const uploadTask = uploadBytesResumable(storageRef, img);
     uploadTask.on(

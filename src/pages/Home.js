@@ -23,12 +23,13 @@ import {
 import { allUsers } from "../slices/UserSlices";
 import Loader from "../components/Loader";
 import Post from "../components/Post";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuid } from "uuid";
 import RightSidebarHome from "../components/RightSidebarHome";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import { BsEmojiSmile } from "react-icons/bs";
 import EmojiPicker from "emoji-picker-react";
 import { getCurrentUser } from "../Api/functional";
+import FlipMove from "react-flip-move";
 const Home = () => {
   const auth = getAuth();
   const db = getDatabase();
@@ -52,7 +53,7 @@ const Home = () => {
         localStorage.setItem("userLoginInfo", JSON.stringify(user));
         // console.log(user);
       } else {
-        console.log( "users not found or may be singout" );
+        console.log("users not found or may be singout");
         navigate("/login");
       }
     });
@@ -69,7 +70,7 @@ const Home = () => {
     setInput(e.target.value);
   };
   let sendEmoji = (emoji) => {
-    setInput(input+emoji.emoji);
+    setInput(input + emoji.emoji);
   };
   let postImg = (e) => {
     setImg(e.target.files[0]);
@@ -77,7 +78,7 @@ const Home = () => {
   let handlePostSend = () => {
     // if (input) {
     if (img) {
-      console.log("ami if",img.name);
+      console.log("ami if", img.name);
       const storageRef = StroageRef(storage, "postImg/" + img.name);
 
       const uploadTask = uploadBytesResumable(storageRef, img);
@@ -239,11 +240,13 @@ const Home = () => {
                   </div>
                 </div>
                 {/* post */}
-                {allPosts
-                  .sort((a, b) => b.timeStamp - a.timeStamp)
-                  .map((item) => (
-                    <Post key={item.postId} item={item} />
-                  ))}
+
+                  {allPosts
+                    .sort((a, b) => b.timeStamp - a.timeStamp)
+                    .map((item) => (
+                      <Post key={item.postId} item={item} />
+                    ))}
+                
               </div>
               {/* Right SideBar */}
               <RightSidebarHome />

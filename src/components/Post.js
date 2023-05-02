@@ -4,6 +4,7 @@ import {
   AiOutlineComment,
   AiOutlineEdit,
   AiOutlineLike,
+  AiOutlinePlusCircle,
   AiTwotoneDelete,
   AiTwotoneLike,
 } from "react-icons/ai";
@@ -13,6 +14,12 @@ import Images from "./Images";
 import { getCurrentUser, getLoginUser } from "../Api/functional";
 import moment from "moment";
 import {
+  getDownloadURL,
+  getStorage,
+  ref as StroageRef,
+  uploadBytesResumable,
+} from "firebase/storage";
+import {
   child,
   get,
   getDatabase,
@@ -20,14 +27,16 @@ import {
   push,
   ref,
   remove,
-  runTransaction,
   serverTimestamp,
   set,
   update,
 } from "firebase/database";
 import { useSelector } from "react-redux";
+import EditPostModal from "./EditPostModal";
+import { FiImage } from "react-icons/fi";
 const Post = ({ item }) => {
   // console.log(item, "post Item");
+  const storage = getStorage();
   const db = getDatabase();
   let data = useSelector((state) => state.allusersInfo.userInfo);
   const [commentBox, setCommentBox] = useState(true);
@@ -39,11 +48,29 @@ const Post = ({ item }) => {
   const [liked, setLiked] = useState(false);
   const [showEditPost, setShowEditPost] = useState(false);
   const [allComments, setAllComments] = useState([]);
+  const [inputValue, setInputValue] = useState(item.postMess);
+  const [postImgs, setPostImgs] = useState(item.postImg);
+  const [isOpen, setIsOpen] = useState(false);
+  const [editPostsBox, setEditPostsBox] = useState(false);
+  const [closeAllIcon, setCloseAllIcon] = useState(true);
+  const [ editPostsId, setEditPostsId ] = useState( "" );
+  const [addNewPostImg, setAddNewPostImg] = useState(null);
+
+  function toggleModal(item) {
+    setIsOpen(!isOpen);
+    setEditPostsId(item.postId);
+    //  setEditPostsBox(!editPostsBox);
+    setShowEditPost(false);
+  }
+
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value);
+  };
   useEffect(() => {
     getLoginUser(setLoginUser);
   }, []);
   useEffect(() => {
-    getCurrentUser(data,setCurrentUser);
+    getCurrentUser(data, setCurrentUser);
   }, []);
   let handleCommentOpen = () => {
     setCommentBox(!commentBox);
@@ -200,6 +227,51 @@ const Post = ({ item }) => {
     }
   };
 
+  let editPost = (items) => {
+    console.log("updatePost", items);
+  };
+  let updatePost = () => {
+    const postRef = ref(db, `post/${editPostsId}`);
+    update(postRef, { postImg: null });
+    // update(postRef, { postImg: addNewPostImg });
+    update(ref(db, "post/" + editPostsId), {
+      postMess: inputValue,
+    }).then(() => {
+      setIsOpen(false);
+    });
+    /* new img */
+
+    const storageRef = StroageRef(storage, "postImg/" + addNewPostImg.name);
+
+    const uploadTask = uploadBytesResumable(storageRef, addNewPostImg);
+    uploadTask.on(
+      (error) => {
+        console.log(error);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          console.log("File available at", downloadURL);
+          update(postRef, { postImg: downloadURL });
+        });
+      }
+    );
+  };
+  let deletePost = (item) => {
+    remove(ref(db, "post/" + item.postId));
+  };
+  let delePostImg = () => {
+    /* console.log( item );
+      const postRef = ref(db, `post/${item.postId}`);
+      update(postRef, { postImg: null }); */
+    // remove(ref(db, "post/" + item.postId +"/" + item.postImg));
+    setPostImgs(null);
+    setCloseAllIcon(false);
+    setAddNewPostImg(null);
+  };
+
+  let addNewpostImg = (e) => {
+    setAddNewPostImg(e.target.files[0]);
+  };
 
   return (
     <>
@@ -207,16 +279,19 @@ const Post = ({ item }) => {
         <div className="bg-white pb-8 pt-4 rounded-md shadow-lg mb-9 relative ">
           {data.uid == item.userId && (
             <BiDotsHorizontal
-              onClick={() => setShowEditPost(!showEditPost)}
+              onClick={() => {
+                setShowEditPost(!showEditPost);
+                setEditPostsBox(false);
+              }}
               className="text-right ml-auto text-3xl mb-5 mr-6 cursor-pointer"
             />
           )}
           {showEditPost && (
             <div className="absolute right-0 top-12 bg-[#f4f4f4] border border-solid border-[#181818] p-5 w-[180px] rounded-lg">
-              <p className="border-solid border-b border-[#ddd] pb-3 mb-2 flex items-center gap-x-3">
-                Edit Post <AiOutlineEdit className="text-lg" />
-              </p>
-              <p className=" flex items-center gap-x-3">
+              <p
+                onClick={() => deletePost(item)}
+                className=" flex items-center gap-x-3"
+              >
                 Delete Post <AiTwotoneDelete className="text-lg" />
               </p>
             </div>
@@ -225,7 +300,7 @@ const Post = ({ item }) => {
           <Flex className="items-center px-8 py-5 gap-5 border-t border-solid border-red-500">
             <div>
               <Images
-                className={`w-[100px] rounded-full`}
+                className={`w-[100px] rounded-full border border-solid border-black`}
                 imgsrc={
                   loginUser
                     .filter((useritem) => useritem.userId == item.userId)
@@ -254,10 +329,10 @@ const Post = ({ item }) => {
             </div>
           </Flex>
           <div className="border border-solid border-black rounded-lg m-10">
-            <Flex className={`items-center gap-x-5`}>
-              <div className=" pl-10">
+            <Flex className={`items-center gap-x-5 p-5`}>
+              <div className=" ">
                 <img
-                  className="w-[50px] h-[50px] object-cover rounded-full border border-solid border-red-500 bg-red-500"
+                  className="w-[50px] h-[50px] object-cover rounded-full border border-solid border-black "
                   src={
                     loginUser
                       .filter((useritem) => useritem.userId == item.postOwnerId)
@@ -285,7 +360,7 @@ const Post = ({ item }) => {
               {item.postsImg && (
                 <div className="w-[100%] pl-10">
                   <img
-                    className="w-[400px] h-[200px] object-cover"
+                    className="w-[400px] h-[200px] object-cover "
                     src={item.postsImg}
                     alt=""
                   />
@@ -366,7 +441,7 @@ const Post = ({ item }) => {
                     >
                       <div>
                         <Images
-                          className={`w-[40px] rounded-full`}
+                          className={`w-[40px] rounded-full border border-solid border-black`}
                           imgsrc={
                             loginUser
                               .filter(
@@ -407,10 +482,16 @@ const Post = ({ item }) => {
           )}
           {showEditPost && (
             <div className="absolute right-0 top-12 bg-[#f4f4f4] border border-solid border-[#181818] p-5 w-[180px] rounded-lg">
-              <p className="border-solid border-b border-[#ddd] pb-3 mb-2 flex items-center gap-x-3">
+              <p
+                onClick={() => toggleModal(item)}
+                className="border-solid border-b border-[#ddd] pb-3 mb-2 flex items-center gap-x-3"
+              >
                 Edit Post <AiOutlineEdit className="text-lg" />
               </p>
-              <p className=" flex items-center gap-x-3">
+              <p
+                onClick={() => deletePost(item)}
+                className=" flex items-center gap-x-3"
+              >
                 Delete Post <AiTwotoneDelete className="text-lg" />
               </p>
             </div>
@@ -419,7 +500,7 @@ const Post = ({ item }) => {
           <Flex className="items-center px-8 py-5 gap-5 border-t border-solid border-red-500">
             <div>
               <Images
-                className={`w-[100px] rounded-full`}
+                className={`w-[100px] rounded-full border border-solid border-black`}
                 imgsrc={
                   loginUser
                     .filter((useritem) => useritem.userId == item.userId)
@@ -454,7 +535,7 @@ const Post = ({ item }) => {
             {item.postImg && (
               <div className="w-[100%] pl-10">
                 <img
-                  className="w-[400px] h-[200px] object-cover"
+                  className="w-[400px] h-[200px] object-cover "
                   src={item.postImg}
                   alt=""
                 />
@@ -532,7 +613,7 @@ const Post = ({ item }) => {
                     >
                       <div>
                         <Images
-                          className={`w-[40px] rounded-full`}
+                          className={`w-[40px] rounded-full border border-solid border-black`}
                           imgsrc={
                             loginUser
                               .filter(
@@ -564,6 +645,58 @@ const Post = ({ item }) => {
           </div>
         </div>
       )}
+      <div className="">
+        {isOpen && (
+          <EditPostModal
+            toggleModal={toggleModal}
+            title="Update your post"
+            sendInfo={updatePost}
+          >
+            <div className=" ">
+              <textarea
+                type="text"
+                className="border border-solid border-black w-full resize-none px-5 h-12"
+                value={inputValue}
+                onChange={handleInputChange}
+              />
+              {addNewPostImg && (
+                <>
+                  <img src={URL.createObjectURL(addNewPostImg)} alt="" />
+                  <AiOutlineCloseCircle
+                    onClick={() => delePostImg()}
+                    className="cursor-pointer text-3xl absolute top-[-5px] right-[140px]"
+                  />
+                </>
+              )}
+              <label>
+                <input
+                  onChange={addNewpostImg}
+                  type="file"
+                  name=""
+                  id=""
+                  className="hidden"
+                />
+                <FiImage className="text-2xl  cursor-pointer" />
+              </label>
+
+              {item.postImg && (
+                <div className="flex items-center gap-x-5 mt-5 relative">
+                  {/* <img src={item.postImg} alt="" /> */}
+                  <img src={postImgs} alt="" />
+
+                  {closeAllIcon && (
+                    <AiOutlineCloseCircle
+                      onClick={() => delePostImg()}
+                      className="cursor-pointer text-3xl absolute top-[-5px] right-[140px]"
+                    />
+                  )}
+                </div>
+              )}
+              {/* <button onClick={updatePost}>update</button> */}
+            </div>
+          </EditPostModal>
+        )}
+      </div>
     </>
   );
 };

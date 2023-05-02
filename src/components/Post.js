@@ -10,7 +10,7 @@ import {
 import { BiDotsHorizontal } from "react-icons/bi";
 import Flex from "./Flex";
 import Images from "./Images";
-import { getLoginUser } from "../Api/functional";
+import { getCurrentUser, getLoginUser } from "../Api/functional";
 import moment from "moment";
 import {
   child,
@@ -33,6 +33,7 @@ const Post = ({ item }) => {
   const [commentBox, setCommentBox] = useState(true);
   const [commentArea, setCommentAre] = useState(true);
   const [loginUser, setLoginUser] = useState([]);
+  const [currentUser, setCurrentUser] = useState({});
   const [likes, setLikes] = useState([]);
   const [input, setinput] = useState("");
   const [liked, setLiked] = useState(false);
@@ -40,6 +41,9 @@ const Post = ({ item }) => {
   const [allComments, setAllComments] = useState([]);
   useEffect(() => {
     getLoginUser(setLoginUser);
+  }, []);
+  useEffect(() => {
+    getCurrentUser(data,setCurrentUser);
   }, []);
   let handleCommentOpen = () => {
     setCommentBox(!commentBox);
@@ -85,8 +89,8 @@ const Post = ({ item }) => {
   const sendCommentPost = () => {
     set(push(ref(db, "post/" + item.postId + "/comments/")), {
       userId: data.uid,
-      userName: data.displayName,
-      userPhoto: data.photoURL,
+      userName: currentUser.username,
+      userPhoto: currentUser.profile_picture,
       comment: input,
       timeStamp: serverTimestamp(),
       date: `${new Date().getFullYear()} ${
@@ -111,6 +115,8 @@ const Post = ({ item }) => {
             const updateCount = (originalPost.updateCount || 0) + 1;
             const updates = {}; // Create an object to hold the updates
             updates[`/post/${item.postId}/updateCount`] = updateCount; // Add the updateCount field to the updates object
+            /* updates[`/post/${item.postId}/postOwnerName`] =
+              currentUser.username; */
             return update(ref(db), updates); // Use the updates object as the argument for update() function
           } else {
             // If the original post does not exist, throw an error or handle it accordingly
@@ -194,6 +200,7 @@ const Post = ({ item }) => {
     }
   };
 
+
   return (
     <>
       {item.isSharedPost ? (
@@ -250,14 +257,23 @@ const Post = ({ item }) => {
             <Flex className={`items-center gap-x-5`}>
               <div className=" pl-10">
                 <img
-                  className="w-[50px] h-[50px] object-cover rounded-full border border-solid border-black "
-                  src={item.postOwnerPhoto}
+                  className="w-[50px] h-[50px] object-cover rounded-full border border-solid border-red-500 bg-red-500"
+                  src={
+                    loginUser
+                      .filter((useritem) => useritem.userId == item.postOwnerId)
+                      .map((item) => item.profile_picture)[0]
+                  }
                   alt=""
                 />
               </div>
-              <h4>
-                {item.postOwnerName}{" "}
-                <span>
+              <h4 className="mr-5">
+                {
+                  loginUser
+                    .filter((useritem) => useritem.userId == item.postOwnerId)
+                    .map((item) => item.username)[0]
+                }
+
+                <span className="ml-5">
                   {moment(item.postsDate, "YYYYMMDD hh:mm").fromNow()}
                 </span>
               </h4>
@@ -457,7 +473,6 @@ const Post = ({ item }) => {
             </Flex>
             <Flex className="pt-5 cursor-pointer gap-x-5">
               <p onClick={() => setCommentAre(!commentArea)}>
-                
                 {allComments.length >= 0 && <span>{allComments.length}</span>} .
                 comments
               </p>

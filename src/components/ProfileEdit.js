@@ -15,34 +15,21 @@ const ProfileEdit = () => {
     getCurrentUser(data, setCurrentUser);
   }, []);
   const [showEdit, setShowEdit] = useState(false);
-  const [inputValus, setInputValus] = useState({
-    // currentUser,
-    username: currentUser.username,
-    headline: "",
-    location: "",
-    college: "",
-    city: "",
-    website: "",
-    aboutMe: "",
-  });
+  const [inputValus, setInputValus] = useState(currentUser);
   let updateInputs = (e) => {
     let { name, value } = e.target;
 
     let inputs = { [name]: value };
     setInputValus({ ...inputValus, ...inputs });
   };
+  console.log("inputValus", inputValus);
   let handleUpdateProfile = () => {
     updateProfile(auth.currentUser, {
       displayName: inputValus.username,
     })
       .then(() => {
         update(ref(db, "users/" + auth.currentUser.uid), {
-          username: inputValus.username,
-          headline: inputValus.headline,
-          location: inputValus.location,
-          city: inputValus.city,
-          website: inputValus.website,
-          aboutMe: inputValus.aboutMe,
+          ...inputValus,
         });
       })
       .catch((error) => {

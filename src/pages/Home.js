@@ -52,7 +52,8 @@ const Home = () => {
         localStorage.setItem("userLoginInfo", JSON.stringify(user));
         // console.log(user);
       } else {
-        alert("users not found or may be singout");
+        console.log( "users not found or may be singout" );
+        navigate("/login");
       }
     });
   }, []);
